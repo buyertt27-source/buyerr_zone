@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Sam's Resto - Fluid UI</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --accent: #fbbf24;
+            --glass: rgba(255, 255, 255, 0.08);
+            --glass-border: rgba(255, 255, 255, 0.15);
+            --bg-dark: #07090f;
+            --ease-hyper: cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+        body, html {
+            height: 100%;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg-dark);
+            color: #fff;
+            overflow: hidden; /* Dikunci saat di Bio */
+        }
+
+        /* --- BACKGROUND --- */
+        .bg-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: url('https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?q=80&w=1200') center/cover;
+            z-index: -1;
+            transition: 1.2s var(--ease-hyper);
+            filter: blur(15px) brightness(0.4);
+            will-change: filter, transform;
+        }
+
+        /* --- NAVBAR --- */
+        .navbar {
+            position: fixed;
+            top: 0; width: 100%; height: 70px;
+            display: flex; align-items: center; justify-content: center;
+            z-index: 2000; background: rgba(7, 9, 15, 0.7);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--glass-border);
+            transform: translateY(-100%);
+            transition: 0.6s var(--ease-hyper);
+        }
+
+        .navbar.show { transform: translateY(0); }
+
+        .back-btn {
+            position: absolute; left: 15px;
+            background: var(--glass); border: 1px solid var(--glass-border);
+            color: white; padding: 10px 18px; border-radius: 14px;
+            cursor: pointer; font-weight: 600; transition: 0.3s;
+        }
+
+        /* --- PAGE 1: BIODATA --- */
+        .page-bio {
+            position: fixed;
+            width: 100%; height: 100vh;
+            display: flex; justify-content: center; align-items: center;
+            padding: 20px;
+            z-index: 100;
+            transition: 0.8s var(--ease-hyper);
+            will-change: transform, opacity;
+        }
+
+        .bio-card {
+            background: var(--glass);
+            backdrop-filter: blur(30px);
+            border: 1px solid var(--glass-border);
+            padding: 40px 30px; border-radius: 40px;
+            text-align: center; max-width: 420px; width: 100%;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        .bio-card img {
+            width: 110px; height: 110px; border-radius: 30px;
+            object-fit: cover; margin-bottom: 25px;
+            border: 2.5px solid var(--accent);
+            box-shadow: 0 10px 20px rgba(251, 191, 36, 0.2);
+        }
+
+        .bio-card h2 { font-family: 'Playfair Display', serif; font-size: 2.8rem; margin-bottom: 8px; color: var(--accent); }
+        .bio-card p { color: #ddd; font-size: 0.95rem; margin-bottom: 6px; }
+
+        .btn-menu {
+            margin-top: 35px; padding: 18px;
+            background: var(--accent); color: #000;
+            border: none; border-radius: 20px;
+            font-weight: 800; cursor: pointer; width: 100%;
+            font-size: 1rem; letter-spacing: 0.5px;
+            transition: 0.4s var(--ease-hyper);
+        }
+
+        .btn-menu:active { transform: scale(0.95); }
+
+        /* --- PAGE 2: MENU --- */
+        .page-menu {
+            position: fixed;
+            width: 100%; height: 100vh;
+            top: 0; left: 0;
+            overflow-y: scroll;
+            opacity: 0;
+            transform: translateY(60px) scale(0.98);
+            pointer-events: none; /* Penting: dinonaktifkan saat tidak aktif */
+            transition: 0.8s var(--ease-hyper);
+            padding-top: 80px;
+            background: var(--bg-dark);
+            z-index: 50;
+            will-change: transform, opacity;
+        }
+
+        /* --- STATE LOGIC --- */
+        .is-menu-open .page-bio { transform: scale(0.85); opacity: 0; pointer-events: none; }
+        .is-menu-open .page-menu { opacity: 1; transform: translateY(0) scale(1); pointer-events: all; }
+        .is-menu-open .bg-overlay { filter: blur(40px) brightness(0.25); transform: scale(1.1); }
+
+        /* --- MENU ITEMS --- */
+        .menu-list { max-width: 700px; margin: 0 auto; padding: 20px; }
+        
+        .search-container { position: sticky; top: 0; z-index: 10; margin-bottom: 25px; }
+        .search-bar {
+            width: 100%; padding: 18px 25px; border-radius: 20px;
+            background: var(--glass); border: 1px solid var(--glass-border);
+            color: white; font-size: 1rem; outline: none; transition: 0.3s;
+            backdrop-filter: blur(10px);
+        }
+        .search-bar:focus { border-color: var(--accent); background: rgba(255,255,255,0.12); }
+
+        .card {
+            background: transparent; border-radius: 24px; padding: 15px;
+            margin-bottom: 12px; cursor: pointer;
+            transition: all 0.5s var(--ease-hyper);
+            border: 1px solid transparent;
+            overflow: hidden;
+        }
+
+        .card:active { transform: scale(0.98); }
+
+        .card-header { display: flex; align-items: center; gap: 18px; transition: 0.5s var(--ease-hyper); }
+        .thumb { width: 75px; height: 75px; border-radius: 18px; object-fit: cover; transition: 0.6s var(--ease-hyper); }
+        
+        .card.active { background: var(--glass); border-color: var(--glass-border); padding: 25px; }
+        .card.active .thumb { width: 100%; height: 280px; margin-bottom: 20px; border-radius: 20px; }
+        .card.active .card-header { flex-direction: column; align-items: flex-start; }
+
+        .details { 
+            max-height: 0; opacity: 0; transition: 0.5s var(--ease-hyper); 
+            transform: translateY(10px);
+        }
+        .card.active .details { max-height: 600px; opacity: 1; transform: translateY(0); padding-top: 10px; }
+
+        .mat-tag {
+            background: rgba(251, 191, 36, 0.1); color: var(--accent);
+            padding: 8px 15px; border-radius: 10px; font-size: 0.85rem;
+            display: inline-block; margin-bottom: 15px; border: 1px solid rgba(251, 191, 36, 0.2);
+        }
+
+        .social-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+        .social-grid a { 
+            text-align: center; color: white; padding: 12px; 
+            border-radius: 15px; background: rgba(255,255,255,0.05); transition: 0.3s;
+            font-size: 1.2rem;
+        }
+        .social-grid a:hover { background: var(--accent); color: #000; }
+
+        footer { padding: 60px 20px; text-align: center; color: #555; font-size: 0.85rem; }
+
+        /* Scrollbar styling */
+        .page-menu::-webkit-scrollbar { width: 4px; }
+        .page-menu::-webkit-scrollbar-thumb { background: var(--glass-border); border-radius: 10px; }
+    </style>
+</head>
+<body>
+
+    <div class="bg-overlay"></div>
+
+    <nav class="navbar" id="navbar">
+        <button class="back-btn" onclick="goToBio()">
+            <i class="fas fa-arrow-left"></i>
+        </button>
+        <h1 style="font-family:'Playfair Display'; letter-spacing:1px; font-size:1.2rem">SAM'S RESTO</h1>
+    </nav>
+
+    <section class="page-bio" id="bioSection">
+        <div class="bio-card">
+            <img src="https://images.unsplash.com/photo-1555396273-367ea4eb4db5?q=80&w=400">
+            <h2>Sam's Resto</h2>
+            <div style="margin: 15px 0;">
+                <p><i class="fas fa-map-marker-alt" style="color:var(--accent); margin-right:8px"></i> Jl. Senopati No. 12, Jakarta</p>
+                <p><i class="fas fa-clock" style="color:var(--accent); margin-right:8px"></i> 10:00 - 22:00 WIB</p>
+                <p><i class="fas fa-phone" style="color:var(--accent); margin-right:8px"></i> +62 812 3456 789</p>
+            </div>
+            <button class="btn-menu" onclick="goToMenu()">LIHAT MENU KAMI</button>
+        </div>
+    </section>
+
+    <section class="page-menu" id="menuPage">
+        <div class="menu-list">
+            <div class="search-container">
+                <input type="text" class="search-bar" id="search" placeholder="Cari rasa favoritmu..." onkeyup="filter()">
+            </div>
+            <div id="itemsContainer"></div>
+        </div>
+        <footer>
+            <p>Eksplorasi Rasa Sejak 2026</p>
+            <p style="margin-top:5px; font-weight:800; color:#888">©sam resto</p>
+        </footer>
+    </section>
+
+    <script>
+        const menuData = [
+            { name: "Wagyu Steak A5", price: "Rp 450.000", img: "https://images.unsplash.com/photo-1546241072-48010ad28c2c?q=80&w=400" },
+            { name: "Salmon Mentai Rice", price: "Rp 85.000", img: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?q=80&w=400" },
+            { name: "Truffle Carbonara", price: "Rp 110.000", img: "https://images.unsplash.com/photo-1473093226795-af9932fe5856?q=80&w=400" },
+            { name: "Lobster Garlic Butter", price: "Rp 350.000", img: "https://images.unsplash.com/photo-1559742811-82428b49223b?q=80&w=400" },
+            { name: "Matcha Lava Cake", price: "Rp 45.000", img: "https://images.unsplash.com/photo-1511911063855-2bf39afa5b2e?q=80&w=400" },
+            { name: "Blue Lagoon Fizz", price: "Rp 35.000", img: "https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd?q=80&w=400" },
+            { name: "Gourmet Beef Burger", price: "Rp 95.000", img: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?q=80&w=400" },
+            { name: "Premium Dimsum", price: "Rp 55.000", img: "https://images.unsplash.com/photo-1496116218417-1a781b1c416c?q=80&w=400" },
+            { name: "Coffee Sea Salt", price: "Rp 40.000", img: "https://images.unsplash.com/photo-1485808191679-5f86510681a2?q=80&w=400" }
+        ];
+
+        // Render Menu Secara Otomatis
+        const container = document.getElementById('itemsContainer');
+        menuData.forEach(m => {
+            container.innerHTML += `
+                <div class="card" onclick="toggleCard(this)">
+                    <div class="card-header">
+                        <img src="${m.img}" class="thumb">
+                        <div>
+                            <h3 style="font-size:1.1rem">${m.name}</h3>
+                            <span style="color:var(--accent); font-weight:800">${m.price}</span>
+                        </div>
+                    </div>
+                    <div class="details">
+                        <div class="mat-tag">Bahan Premium & Organik</div>
+                        <p style="color:#aaa; font-size:0.85rem; margin-bottom:20px; line-height:1.5">Nikmati perpaduan rasa autentik yang diproses dengan teknik memasak modern untuk menjaga nutrisi dan kelezatan di setiap gigitan.</p>
+                        <div class="social-grid">
+                            <a href="#" style="color:#25D366"><i class="fab fa-whatsapp"></i></a>
+                            <a href="#" style="color:#E4405F"><i class="fab fa-instagram"></i></a>
+                            <a href="#" style="color:#0088cc"><i class="fab fa-telegram"></i></a>
+                            <a href="#" style="color:#1877F2"><i class="fab fa-facebook"></i></a>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+
+        // FUNGSI NAVIGASI SMOOTH
+        function goToMenu() {
+            document.body.classList.add('is-menu-open');
+            document.getElementById('navbar').classList.add('show');
+            // Reset scroll position menu
+            document.getElementById('menuPage').scrollTo(0,0);
+        }
+
+        function goToBio() {
+            document.body.classList.remove('is-menu-open');
+            document.getElementById('navbar').classList.remove('show');
+        }
+
+        // FUNGSI ACCORDION MENU
+        function toggleCard(el) {
+            const allCards = document.querySelectorAll('.card');
+            
+            allCards.forEach(c => {
+                if(c !== el) {
+                    c.classList.remove('active');
+                }
+            });
+
+            const isActive = el.classList.toggle('active');
+
+            if(isActive) {
+                // Auto-scroll halus ke kartu yang terbuka
+                setTimeout(() => {
+                    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }, 400);
+            }
+        }
+
+        // FUNGSI FILTER PENCARIAN
+        function filter() {
+            let val = document.getElementById('search').value.toLowerCase();
+            document.querySelectorAll('.card').forEach(c => {
+                let name = c.querySelector('h3').innerText.toLowerCase();
+                if(name.includes(val)) {
+                    c.style.display = "block";
+                } else {
+                    c.style.display = "none";
+                    c.classList.remove('active');
+                }
+            });
+        }
+    </script>
+</body>
+</html>
